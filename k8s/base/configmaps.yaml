@@ -4,8 +4,14 @@ metadata:
   name: agrosense-app-config
   namespace: agrosense
 data:
+  #reverse proxy  
   ReverseProxy__Clusters__identity-cluster__Destinations__destination1__Address: "http://agrosense-api-identity:80/"
   ReverseProxy__Clusters__property-cluster__Destinations__destination1__Address: "http://agrosense-api-property:80/"
   ReverseProxy__Clusters__sensor-ingestion-cluster__Destinations__destination1__Address: "http://agrosense-api-sensor:80/"
   ReverseProxy__Clusters__alerts-cluster__Destinations__destination1__Address: "http://agrosense-api-alert:80/"
 
+  #rabbitmq
+  RabbitMQ__HostName: "rabbitmq"
+  RabbitMQ__Port: "5672"
+  RabbitMQ__UserName: "agrosense"
+  RabbitMQ__Password: "agrosense"
