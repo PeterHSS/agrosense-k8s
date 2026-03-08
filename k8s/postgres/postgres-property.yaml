@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-property-secret
+  namespace: agrosense
+type: Opaque
+stringData:
+  POSTGRES_DB: agrosense_property
+  POSTGRES_USER: agrosense
+  POSTGRES_PASSWORD: agrosense
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-property-pvc
+  namespace: agrosense
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-property
+  namespace: agrosense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-property
+  template:
+    metadata:
+      labels:
+        app: postgres-property
+    spec:
+      containers:
+        - name: postgres-property
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-property-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-property-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-property
+  namespace: agrosense
+spec:
+  selector:
+    app: postgres-property
+  ports:
+    - port: 5432
+      targetPort: 5432

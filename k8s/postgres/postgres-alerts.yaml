@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-alerts-secret
+  namespace: agrosense
+type: Opaque
+stringData:
+  POSTGRES_DB: agrosense_alerts
+  POSTGRES_USER: agrosense
+  POSTGRES_PASSWORD: agrosense
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-alerts-pvc
+  namespace: agrosense
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-alerts
+  namespace: agrosense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-alerts
+  template:
+    metadata:
+      labels:
+        app: postgres-alerts
+    spec:
+      containers:
+        - name: postgres-alerts
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-alerts-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-alerts-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-alerts
+  namespace: agrosense
+spec:
+  selector:
+    app: postgres-alerts
+  ports:
+    - port: 5432
+      targetPort: 5432

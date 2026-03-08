@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agrosense-api-sensor
+  namespace: agrosense  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agrosense-api-sensor
+  template:
+    metadata:
+      labels:
+        app: agrosense-api-sensor
+    spec:
+      containers:
+      - name: agrosense-api-sensor
+        image: klurgs/agrosense-sensor:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        envFrom:
+        - configMapRef:
+            name: agrosense-app-config 
+        - secretRef:
+            name: agrosense-app-secrets
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agrosense-api-sensor
+  namespace: agrosense
+spec:
+  type: ClusterIP  # Internal apenas, acessível via Gateway
+  selector:
+    app: agrosense-api-sensor
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: agrosense-api-sensor-hpa
+  namespace: agrosense
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agrosense-api-sensor
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50

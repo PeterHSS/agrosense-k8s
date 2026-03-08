@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Base
+  - base/namespace.yaml
+
+  # PostgreSQL databases
+  - postgres/postgres-identity.yaml
+  - postgres/postgres-property.yaml
+  - postgres/postgres-sensor-ingestion.yaml
+  - postgres/postgres-alerts.yaml
+
+  # Monitoring stack
+  - monitoring/loki.yaml
+  - monitoring/prometheus.yaml
+  - monitoring/grafana.yaml
+
+  # Messaging
+  - rabbitmq/rabbitmq.yaml
+
+  # applications
+  - applications/identity.yaml
+  - applications/property.yaml
+  - applications/sensor-ingestion.yaml
+  - applications/alerts.yaml
+  - applications/gateway.yaml
+

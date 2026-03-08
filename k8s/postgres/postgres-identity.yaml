@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-identity-secret
+  namespace: agrosense
+type: Opaque
+stringData:
+  POSTGRES_DB: agrosense_identity
+  POSTGRES_USER: agrosense
+  POSTGRES_PASSWORD: agrosense
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-identity-pvc
+  namespace: agrosense
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-identity
+  namespace: agrosense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-identity
+  template:
+    metadata:
+      labels:
+        app: postgres-identity
+    spec:
+      containers:
+        - name: postgres-identity
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-identity-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-identity-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-identity
+  namespace: agrosense
+spec:
+  selector:
+    app: postgres-identity
+  ports:
+    - port: 5432
+      targetPort: 5432

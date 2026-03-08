@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-sensor-ingestion-secret
+  namespace: agrosense
+type: Opaque
+stringData:
+  POSTGRES_DB: agrosense_sensor_ingestion
+  POSTGRES_USER: agrosense
+  POSTGRES_PASSWORD: agrosense
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-sensor-ingestion-pvc
+  namespace: agrosense
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-sensor-ingestion
+  namespace: agrosense
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-sensor-ingestion
+  template:
+    metadata:
+      labels:
+        app: postgres-sensor-ingestion
+    spec:
+      containers:
+        - name: postgres-sensor-ingestion
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-sensor-ingestion-secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-sensor-ingestion-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-sensor-ingestion
+  namespace: agrosense
+spec:
+  selector:
+    app: postgres-sensor-ingestion
+  ports:
+    - port: 5432
+      targetPort: 5432
