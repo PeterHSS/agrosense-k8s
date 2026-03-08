@@ -23,6 +23,6 @@ resources:
   - applications/identity.yaml
   - applications/property.yaml
   - applications/sensor.yaml
-  - applications/alerts.yaml
+  - applications/alert.yaml
   - applications/gateway.yaml
 
