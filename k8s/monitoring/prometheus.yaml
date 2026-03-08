@@ -4,6 +4,7 @@ metadata:
   name: prometheus-pvc
   namespace: agrosense
 spec:
+  storageClassName: standard  
   accessModes:
     - ReadWriteOnce
   resources:
@@ -20,10 +21,29 @@ data:
     global:
       scrape_interval: 15s
     scrape_configs:
-      - job_name: 'prometheus'
+      - job_name: "prometheus"
         static_configs:
-          - targets: ['localhost:9090']
-    # Add your scrape targets below
+          - targets: ["localhost:9090"]
+
+      - job_name: "agrosense-identity-api"
+        metrics_path: /api/metrics/users
+        static_configs:
+          - targets: ["agrosense-api-gateway.agrosense.svc.cluster.local:80"]
+
+      - job_name: "agrosense-sensor-ingestion-api"
+        metrics_path: /api/metrics/sensors
+        static_configs:
+          - targets: ["agrosense-api-gateway.agrosense.svc.cluster.local:80"]
+
+      - job_name: "agrosense-property-api"
+        metrics_path: /api/metrics/properties
+        static_configs:
+          - targets: ["agrosense-api-gateway.agrosense.svc.cluster.local:80"]
+
+      - job_name: "agrosense-alerts-api"
+        metrics_path: /api/metrics/alerts
+        static_configs:
+          - targets: ["agrosense-api-gateway.agrosense.svc.cluster.local:80"]
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -40,6 +60,9 @@ spec:
       labels:
         app: prometheus
     spec:
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534  
       containers:
         - name: prometheus
           image: prom/prometheus:v3.2.1
@@ -65,8 +88,10 @@ metadata:
   name: prometheus
   namespace: agrosense
 spec:
+  type: NodePort
   selector:
     app: prometheus
   ports:
     - port: 9090
       targetPort: 9090
+      nodePort: 30090  # acesso via <ip-do-node>:30090
