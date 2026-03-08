@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   # Base
   - base/namespace.yaml
+  - base/configmaps.yaml 
+  - base/secrets.yaml
 
   # PostgreSQL databases
   - postgres/postgres-identity.yaml
