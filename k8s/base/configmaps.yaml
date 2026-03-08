@@ -15,3 +15,6 @@ data:
   RabbitMQ__Port: "5672"
   RabbitMQ__UserName: "agrosense"
   RabbitMQ__Password: "agrosense"
+
+  #loki
+  Serilog__WriteTo__1__Args__uri: "http://loki.agrosense.svc.cluster.local:3100/"
