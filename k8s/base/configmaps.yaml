@@ -4,51 +4,8 @@ metadata:
   name: agrosense-app-config
   namespace: agrosense
 data:
-  # -------------------------
-  # Configurações gerais
-  # -------------------------
-  APP_ENV: "production"
-  APP_PORT: "8080"
-  LOG_LEVEL: "info"
+  ReverseProxy__Clusters__identity-cluster__Destinations__destination1__Address: "http://agrosense-api-identity:80/"
+  ReverseProxy__Clusters__property-cluster__Destinations__destination1__Address: "http://agrosense-api-property:80/"
+  ReverseProxy__Clusters__sensor-ingestion-cluster__Destinations__destination1__Address: "http://agrosense-api-sensor:80/"
+  ReverseProxy__Clusters__alerts-cluster__Destinations__destination1__Address: "http://agrosense-api-alert:80/"
 
-  # -------------------------
-  # Banco de dados - Alert
-  # -------------------------
-  ALERT_DB_HOST: "postgres-alerts"
-  ALERT_DB_PORT: "5432"
-  ALERT_DB_NAME: "alerts"
-
-  # -------------------------
-  # Banco de dados - Identity
-  # -------------------------
-  IDENTITY_DB_HOST: "postgres-identity"
-  IDENTITY_DB_PORT: "5432"
-  IDENTITY_DB_NAME: "identity"
-
-  # -------------------------
-  # Banco de dados - Property
-  # -------------------------
-  PROPERTY_DB_HOST: "postgres-property"
-  PROPERTY_DB_PORT: "5432"
-  PROPERTY_DB_NAME: "property"
-
-  # -------------------------
-  # Banco de dados - Sensor
-  # -------------------------
-  SENSOR_DB_HOST: "postgres-sensor-ingestion"
-  SENSOR_DB_PORT: "5432"
-  SENSOR_DB_NAME: "sensor"
-
-  # -------------------------
-  # RabbitMQ
-  # -------------------------
-  RABBITMQ_HOST: "rabbitmq"
-  RABBITMQ_PORT: "5672"
-  RABBITMQ_VHOST: "/"
-
-  # -------------------------
-  # Observabilidade
-  # -------------------------
-  GRAFANA_URL: "http://grafana:3000"
-  PROMETHEUS_URL: "http://prometheus:9090"
-  LOKI_URL: "http://loki:3100"

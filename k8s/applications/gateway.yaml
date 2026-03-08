@@ -22,6 +22,11 @@ spec:
           env:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
+          envFrom:
+            - configMapRef:
+                name: agrosense-app-config
+            - secretRef:
+                name: agrosense-app-secret
           resources:
             requests:
               cpu: 100m
@@ -52,12 +57,13 @@ metadata:
   name: agrosense-api-gateway
   namespace: agrosense
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: agrosense-api-gateway
   ports:
     - port: 80
       targetPort: 80
+      nodePort: 30080
       protocol: TCP
 ---
 apiVersion: autoscaling/v2
