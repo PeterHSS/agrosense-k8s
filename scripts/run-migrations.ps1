@@ -1,17 +1,37 @@
 # run-migrations.ps1
 # Roda todas as migrations dos servicos agrosense de uma vez
-
 $ErrorActionPreference = "Stop"
 
-Write-Host "Iniciando port-forwards..." -ForegroundColor Cyan
+function Wait-PodReady {
+    param([string]$label)
+    Write-Host "Aguardando pod $label ficar pronto..." -ForegroundColor Yellow
+    $timeout = 120
+    $elapsed = 0
+    while ($elapsed -lt $timeout) {
+        $status = kubectl get pod -n agrosense -l app=$label -o jsonpath="{.items[0].status.conditions[?(@.type=='Ready')].status}" 2>$null
+        if ($status -eq "True") {
+            Write-Host "Pod $label pronto!" -ForegroundColor Green
+            return
+        }
+        Start-Sleep -Seconds 3
+        $elapsed += 3
+    }
+    throw "Timeout esperando pod $label ficar pronto."
+}
 
+Wait-PodReady "postgres-identity"
+Wait-PodReady "postgres-property"
+Wait-PodReady "postgres-alerts"
+Wait-PodReady "postgres-sensor-ingestion"
+
+Write-Host "Iniciando port-forwards..." -ForegroundColor Cyan
 $pf1 = Start-Process kubectl -ArgumentList "port-forward service/postgres-identity 5432:5432 -n agrosense" -PassThru -WindowStyle Hidden
 $pf2 = Start-Process kubectl -ArgumentList "port-forward service/postgres-property 5433:5432 -n agrosense" -PassThru -WindowStyle Hidden
 $pf3 = Start-Process kubectl -ArgumentList "port-forward service/postgres-alerts 5434:5432 -n agrosense" -PassThru -WindowStyle Hidden
 $pf4 = Start-Process kubectl -ArgumentList "port-forward service/postgres-sensor-ingestion 5435:5432 -n agrosense" -PassThru -WindowStyle Hidden
 
 Write-Host "Aguardando port-forwards ficarem prontos..." -ForegroundColor Yellow
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 5
 
 try {
     # Identity
